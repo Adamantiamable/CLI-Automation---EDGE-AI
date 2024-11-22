@@ -18,7 +18,7 @@ text_to_use_as_input = "I want to find a directory in my system"
 
 # Get AI text output
 def get_AI_output(prompt, max_retries=3, retry_delay=2):
-     for attempt in range(max_retries):
+    for attempt in range(max_retries):
         try : 
             client = OpenAI(
             base_url="https://openrouter.ai/api/v1",
