@@ -8,6 +8,7 @@ import concurrent.futures
 import csv
 import numpy as np
 from transformers import AutoTokenizer, AutoModelForCausalLM
+import automatic_audio_transcription as audio
 
 dotenv.load_dotenv()
 API_KEY = os.getenv("OPENAI_API_KEY")
@@ -220,7 +221,7 @@ def main():
     cmd_coordinates = indexation()
 
     # todo: audio instead
-    input_text = input("Enter a request: ")
+    input_text = audio.audio_listening()
 
     rag_results = rag(input_text, cmd_coordinates, 50)
 
