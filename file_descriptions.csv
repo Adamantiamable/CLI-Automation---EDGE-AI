@@ -1,29 +1,57 @@
 path,description
-README.md,Error: Could not generate description
-.,Error: Could not generate description
-.gitignore,Error: Could not generate description
-CLIVE (2).pptx,Error: Could not generate description
-RelevantCommands.py,Error: Could not generate description
-.env,Error: Could not generate description
-clive_logo.png,Error: Could not generate description
-blabla.txt,Error: Could not generate description
-automatic_audio_transcription.py,Error: Could not generate description
-constants.py,Error: Could not generate description
-coquelicot.jpg,Error: Could not generate description
-main.py,Error: Could not generate description
-inference.py,Error: Could not generate description
-llama_inference_test.ipynb,Error: Could not generate description
-find_paths.py,Error: Could not generate description
-paths_command_extraction.py,Error: Could not generate description
-test_subprocess.py,Error: Could not generate description
-recette_premiere_etape.txt,Error: Could not generate description
-test_main.py,Error: Could not generate description
-recette_deuxieme_etape.txt,Error: Could not generate description
-tulipe.jpg,Error: Could not generate description
-outputs,Error: Could not generate description
-outputs/commands_with_descriptions.csv,Error: Could not generate description
-outputs/command_embeddings.csv,Error: Could not generate description
-outputs/non_filtered_commands.txt,Error: Could not generate description
-test/README.md,Error: Could not generate description
-test,Error: Could not generate description
-outputs/filtered_commands.txt,Error: Could not generate description
+.env,"File .env: The `.env` file likely contains environment variables needed by the Python scripts in the directory.
+"
+.,"File .: The directory likely contains Python code for a project, including configuration files, a presentation, and potentially text and image files related to the project's subject matter.
+"
+README.md,"File README.md: The file `README.md` likely contains a description of the project, its purpose, instructions for use, and contributing guidelines.
+"
+.gitignore,"File .gitignore: The file `.gitignore` likely contains a list of files and directories that should be excluded from version control by Git.
+"
+RelevantCommands.py,"File RelevantCommands.py: RelevantCommands.py likely contains Python functions or classes defining commands for a specific task or workflow.
+"
+blabla.txt,"File blabla.txt: The file `blabla.txt` likely contains text data, possibly configuration information or notes.
+"
+clive_logo.png,"File clive_logo.png: The file `clive_logo.png` likely contains an image logo for a project or application named ""Clive"".
+"
+automatic_audio_transcription.py,"File automatic_audio_transcription.py: The file `automatic_audio_transcription.py` likely contains Python code for automatically transcribing audio files.
+"
+CLIVE (2).pptx,"File CLIVE (2).pptx: The file CLIVE (2).pptx likely contains a PowerPoint presentation about something related to the other files, potentially Cliven-related given the directory structure.
+"
+constants.py,"File constants.py: The file `constants.py` likely contains Python code defining constants used throughout the project.
+"
+coquelicot.jpg,"File coquelicot.jpg: The file coquelicot.jpg likely contains an image of a corn poppy flower.
+"
+find_paths.py,"File find_paths.py: The file `find_paths.py` likely contains Python code to locate and manage file paths within the project.
+"
+inference.py,"File inference.py: The file `inference.py` likely contains Python code for performing inference, potentially using a large language model like Llama.
+"
+llama_inference_test.ipynb,"File llama_inference_test.ipynb: The file `llama_inference_test.ipynb` likely contains Jupyter Notebook code for testing llama inference.
+"
+paths_command_extraction.py,"File paths_command_extraction.py: The file `paths_command_extraction.py` likely contains code to extract file paths and/or command-line arguments for use in other scripts.
+"
+recette_deuxieme_etape.txt,"File recette_deuxieme_etape.txt: The file `recette_deuxieme_etape.txt` likely contains the second stage of a recipe, possibly in text format.
+"
+recette_premiere_etape.txt,"File recette_premiere_etape.txt: The file `recette_premiere_etape.txt` likely contains the first step of a recipe, possibly in a text-based format.
+"
+test_main.py,"File test_main.py: The file `test_main.py` likely contains unit tests for the application's main functionality.
+"
+main.py,"File main.py: The file `main.py` likely contains the main logic or entry point of a Python application.
+"
+test_subprocess.py,"File test_subprocess.py: The file `test_subprocess.py` likely contains unit tests related to the subprocess module.
+"
+tulipe.jpg,"File tulipe.jpg: The file `tulipe.jpg` is likely an image file, possibly a tulip.
+"
+outputs,"File outputs: The directory likely contains CSV files and text files with command embeddings, descriptions, and filtered/unfiltered commands, resulting from a processing pipeline.
+"
+outputs/command_embeddings.csv,"File outputs/command_embeddings.csv: The file `outputs/command_embeddings.csv` likely contains comma-separated values representing embeddings of commands, possibly for use in a machine learning model.
+"
+outputs/commands_with_descriptions.csv,"File outputs/commands_with_descriptions.csv: The file `outputs/commands_with_descriptions.csv` likely contains a list of commands, along with their corresponding descriptions.
+"
+outputs/filtered_commands.txt,"File outputs/filtered_commands.txt: The file `outputs/filtered_commands.txt` likely contains a list of commands that have passed some filtering process.
+"
+outputs/non_filtered_commands.txt,"File outputs/non_filtered_commands.txt: The file `outputs/non_filtered_commands.txt` likely contains a list of command strings, unprocessed or unfiltered.
+"
+test,"File test: The directory `test` likely contains documentation or instructions, possibly related to a program or project.
+"
+test/README.md,"File test/README.md: A README file describing the contents and usage of a directory or project named `test`.
+"
