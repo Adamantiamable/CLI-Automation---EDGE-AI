@@ -23,7 +23,7 @@ def get_AI_output(prompt, max_retries=3, retry_delay=2):
             
             completion = client.chat.completions.create(
             extra_headers={},
-            SENTENCE_TRANSFORMER="google/gemini-flash-1.5-8b",
+            model="google/gemini-flash-1.5-8b",
             messages=[
                 {
                 "role": "user",

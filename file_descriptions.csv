@@ -1,0 +1,31 @@
+path,description
+.env,"`.env` likely contains environment variables needed by the Python scripts (e.g., API keys, database credentials, file paths).
+"
+.gitignore,"A `.gitignore` file, likely for a Python project.  It specifies files and directories to exclude from version control (like `.env`, build artifacts, temporary files).
+"
+.,"A Python project, likely for automatic audio transcription using a large language model (LLM) like Llama.  It includes configuration (.env), version control (.gitignore), documentation (README), Python scripts for transcription, path finding, and command extraction, a Jupyter notebook for testing, and a main execution script.
+"
+llama_inference_test.ipynb,"A Jupyter Notebook (`*.ipynb`) for testing the inference capabilities of a large language model (LLM) called ""llama"".  The accompanying Python scripts likely contain the LLM implementation or supporting functions.
+"
+find_paths.py,"`find_paths.py` likely contains Python code to locate and/or manage file paths within a project.  It likely interacts with other scripts in the project (like `RelevantCommands.py`, `main.py`) to determine paths to various data files, directories, or configuration settings.
+"
+automatic_audio_transcription.py,"Likely a Python script for automatically transcribing audio files.  It likely uses a large language model (LLM) for transcription, judging from `llama_inference_test.ipynb`.  `RelevantCommands.py` and `paths_command_extraction.py` suggest functionality for managing file paths and potential commands related to the transcription process. `main.py` likely orchestrates the entire process.
+"
+README.md,"A Python project, likely for audio transcription using a large language model (LLM) like Llama 2, involving command-line tools, configurations, and automated processing.  Includes test scripts and a README explaining the project.
+"
+RelevantCommands.py,"`RelevantCommands.py` likely contains Python code defining and/or managing commands related to audio transcription, potentially leveraging the other files involved in audio processing (automatic_audio_transcription.py, find_paths.py, paths_command_extraction.py) and AI inference (llama_inference_test.ipynb).  It might handle user input and orchestrate tasks within a larger audio processing or language processing pipeline.
+"
+main.py,"Likely a Python application (`main.py`) for audio transcription using a large language model (LLM) like Llama.  It interacts with audio files, likely utilizing transcription tools/libraries.  `RelevantCommands.py`, `paths_command_extraction.py`, and potentially `find_paths.py` handle file paths and command parsing.  `automatic_audio_transcription.py` likely contains core transcription functionality.  `llama_inference_test.ipynb` suggests experimentation/testing with the LLM.
+"
+paths_command_extraction.py,"`paths_command_extraction.py` likely contains Python code to extract paths (likely file paths or directory paths) and associated commands from some source (e.g., a configuration file, user input, or another script).  It's likely part of a larger system for processing file paths or running commands on them.
+"
+outputs,"The `outputs` directory likely contains the results of a command processing or analysis pipeline.  The files suggest: command embeddings, descriptions of commands, filtered commands, and unfiltered commands.
+"
+outputs/command_embeddings.csv,"The file `outputs/command_embeddings.csv` likely contains the vector embeddings of various commands.  It's likely a CSV file with each row representing a command and its corresponding numerical embedding.
+"
+outputs/commands_with_descriptions.csv,"The file `outputs/commands_with_descriptions.csv` likely contains a table of commands and their corresponding descriptions.  The other files suggest a command processing pipeline.  `command_embeddings.csv` probably holds vector embeddings of the commands, while `filtered_commands.txt` and `non_filtered_commands.txt` list commands that passed or failed a filtering process, respectively.
+"
+outputs/filtered_commands.txt,"The file `outputs/filtered_commands.txt` likely contains a list of commands that have passed some filtering criteria.  The other files suggest it's part of a command processing pipeline, possibly for natural language processing applications.
+"
+outputs/non_filtered_commands.txt,"`outputs/non_filtered_commands.txt` likely contains a list of raw command strings, possibly in a format suitable for parsing.  It's a complement to `filtered_commands.txt`, which suggests a command filtering process, and likely has a large number of commands intended to be processed but not yet filtered (i.e., pre-processing).
+"
