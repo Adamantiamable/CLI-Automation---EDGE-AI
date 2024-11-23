@@ -22,7 +22,7 @@ def audio_listening():
     audio = pyaudio.PyAudio()
     stream = audio.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK)
 
-    print("Parlez... ")
+    print("Speak... ")
 
     #try:
     frames = []
@@ -39,11 +39,11 @@ def audio_listening():
 
 
 #except KeyboardInterrupt:
-    print("\nEnregistrement arrêté.")
+    print("\nRecording stopped.")
     audio_data = np.concatenate(frames)
 
     # Transcription
-    print("Transcription en cours...")
+    print("Transcription in progress...")
     audio_float32 = audio_data.astype(np.float32) / 32768.0
     transcription = asr_pipeline(audio_float32)["text"]
     #print(f"Texte transcrit : {transcription}")

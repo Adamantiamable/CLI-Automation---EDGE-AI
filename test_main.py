@@ -44,20 +44,22 @@ def main():
     if subprocess_output.returncode == 0:
         print('SUCCESS')
         if result['arguments']['file'] == "llama_inference_test.ipynb":
-            print("""Étape 1
+            print("""Step 1
 
-Éplucher et découper en morceaux 4 Golden.
+Peel and chop 4 Golden.
 
-Étape 2
+Step 2
 
-Faire une compote : les mettre dans une casserole avec un peu d'eau (1 verre ou 2). Bien remuer. Quand les pommes commencent à ramollir, ajouter un sachet ou un sachet et demi de sucre vanillé. Ajouter un peu d'eau si nécessaire.
+Make a compote: place in a saucepan with a little water (1 glass or 2). Stir well. When the apples begin to soften, add one or one-and-a-half sachets of vanilla sugar. Add a little water if necessary.
 
-Étape 3
-Vous saurez si la compote est prête une fois que les pommes ne seront plus dures du tout. Ce n'est pas grave s'il reste quelques morceaux.
+Step 3
+You'll know if the compote is ready when the apples are no longer hard at all. It's okay if there are a few chunks left.
 
-Étape 4
+Step 4
 
-Pendant que la compote cuit, éplucher et couper en quatre les deux dernières pommes, puis, couper les quartiers en fines lamelles (elles serviront à être posées sur la compote).""")
+While the compote is cooking, peel and quarter the last two apples, then cut the quarters into thin strips (these will be used to place on top of the compote).
+
+Translated with DeepL.com (free version)""")
         else:
             print(subprocess_output.stdout)
             print("Command executed successfuly")
