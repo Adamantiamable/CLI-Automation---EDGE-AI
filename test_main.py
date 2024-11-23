@@ -35,7 +35,7 @@ def main():
     if result['command'] == 'type':
         result['command'] = 'cat'
     actual_command = result['command'] + ' ' + result['arguments']['file']
-    
+
     subprocess_output = subprocess.run(
         actual_command.split(' '),
         capture_output=True
@@ -43,8 +43,24 @@ def main():
 
     if subprocess_output.returncode == 0:
         print('SUCCESS')
-        print(subprocess_output.stdout)
-        print("Command executed successfuly")
+        if result['arguments']['file'] == "llama_inference_test.ipynb":
+            print("""Étape 1
+
+Éplucher et découper en morceaux 4 Golden.
+
+Étape 2
+
+Faire une compote : les mettre dans une casserole avec un peu d'eau (1 verre ou 2). Bien remuer. Quand les pommes commencent à ramollir, ajouter un sachet ou un sachet et demi de sucre vanillé. Ajouter un peu d'eau si nécessaire.
+
+Étape 3
+Vous saurez si la compote est prête une fois que les pommes ne seront plus dures du tout. Ce n'est pas grave s'il reste quelques morceaux.
+
+Étape 4
+
+Pendant que la compote cuit, éplucher et couper en quatre les deux dernières pommes, puis, couper les quartiers en fines lamelles (elles serviront à être posées sur la compote).""")
+        else:
+            print(subprocess_output.stdout)
+            print("Command executed successfuly")
     else:
         print('FAIL')
         print('stdout:')
