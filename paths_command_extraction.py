@@ -18,6 +18,121 @@ from tqdm import tqdm
 dotenv.load_dotenv()
 API_KEY = os.getenv("OPENAI_API_KEY")
 
+# Define command templates and their metadata
+WINDOWS_COMMANDS = {
+    'copy': {
+        'description': 'Copy one or more files from source to destination',
+        'args': ['source', 'destination'],
+        'template': lambda paths: f'copy "{paths[0]}" "{paths[1]}"'
+    },
+    'move': {
+        'description': 'Move or rename files from source to destination',
+        'args': ['source', 'destination'],
+        'template': lambda paths: f'move "{paths[0]}" "{paths[1]}"'
+    },
+    'del': {
+        'description': 'Delete one or more files',
+        'args': ['target'],
+        'template': lambda paths: f'del "{paths[0]}"'
+    },
+    'dir': {
+        'description': 'List files and folders in a directory',
+        'args': ['directory'],
+        'template': lambda paths: f'dir "{paths[0]}"'
+    },
+    'type': {
+        'description': 'Display the contents of a text file',
+        'args': ['file'],
+        'template': lambda paths: f'type "{paths[0]}"'
+    },
+    'code': {
+        'description': 'Open file or directory in Visual Studio Code',
+        'args': ['target'],
+        'template': lambda paths: f'code "{paths[0]}"'
+    },
+    'notepad': {
+        'description': 'Open file in Notepad text editor',
+        'args': ['file'],
+        'template': lambda paths: f'notepad "{paths[0]}"'
+    },
+    'explorer': {
+        'description': 'Open File Explorer in specified directory',
+        'args': ['directory'],
+        'template': lambda paths: f'explorer "{paths[0]}"'
+    },
+    'mkdir': {
+        'description': 'Create a new directory',
+        'args': ['directory'],
+        'template': lambda paths: f'mkdir "{paths[0]}"'
+    },
+    'rmdir': {
+        'description': 'Remove an empty directory',
+        'args': ['directory'],
+        'template': lambda paths: f'rmdir "{paths[0]}"'
+    }
+}
+
+def generate_command_embeddings(cache_file="command_embeddings.csv"):
+    """Generate and cache embeddings for Windows commands"""
+    if os.path.exists(cache_file):
+        print("Loading existing command embeddings...")
+        df = pd.read_csv(cache_file)
+        return {row['command']: eval(row['embedding']) for _, row in df.iterrows()}
+    
+    print("Generating command embeddings...")
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    
+    embeddings = {}
+    for cmd, metadata in WINDOWS_COMMANDS.items():
+        embedding = model.encode(metadata['description'])
+        embeddings[cmd] = embedding
+    
+    # Save embeddings
+    with open(cache_file, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        writer.writerow(['command', 'description', 'embedding'])
+        for cmd, embedding in embeddings.items():
+            writer.writerow([cmd, WINDOWS_COMMANDS[cmd]['description'], embedding.tolist()])
+    
+    return embeddings
+
+def find_nearest_command(query: str, descriptions, file_embeddings):
+    """Find the nearest Windows command and generate appropriate file paths based on the query"""
+    # Load or generate command embeddings
+    command_embeddings = generate_command_embeddings()
+    
+    # Find closest command
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    query_embedding = model.encode(query)
+    
+    # Calculate command similarities
+    cmd_similarities = {}
+    for cmd, embedding in command_embeddings.items():
+        similarity = 1 - cosine(query_embedding, embedding)
+        cmd_similarities[cmd] = similarity
+    
+    # Get best matching command
+    best_command = max(cmd_similarities.items(), key=lambda x: x[1])[0]
+    command_metadata = WINDOWS_COMMANDS[best_command]
+    
+    # Find paths for each argument
+    selected_paths = []
+    for arg_name in command_metadata['args']:
+        # Modify query to focus on specific argument
+        arg_query = f"{arg_name} for {query}"
+        path, desc, score = find_closest_path(arg_query, "file_embeddings.csv")
+        selected_paths.append(path)
+    
+    # Generate final command using template
+    final_command = command_metadata['template'](selected_paths)
+    
+    return {
+        'command': best_command,
+        'description': command_metadata['description'],
+        'arguments': dict(zip(command_metadata['args'], selected_paths)),
+        'generated_command': final_command,
+        'confidence': cmd_similarities[best_command]
+    }
 
 def walk_directory(workdir: str, exclude_dirs: Set[str] = {'.git', 'node_modules', '__pycache__', '.svn'}) -> Tuple[List[str], List[List[int]], List[List[int]]]:
     """
@@ -174,14 +289,14 @@ def generate_file_descriptions(max_depth=3, cache_file="file_descriptions.csv", 
             if files_info != "":
                 files_info = f"\n{files_info}"
             
-            prompt = f"Given the file path and the file context, describe very quickly what might be in this file or directory: {path}\n{files_info}"
+            prompt = f"Given the file path and the file context, describe in one short sentence what might be in this file or directory: {path}\n{files_info}"
             
             try:
                 response = client.chat.completions.create(
                     model="google/gemini-flash-1.5-8b",
                     messages=[{"role": "user", "content": prompt}]
                 )
-                return path, response.choices[0].message.content
+                return path, f"File {path}: {response.choices[0].message.content[:500]}"
             except Exception as e:
                 print(f"Error processing {path}: {e}")
                 return path, "Error: Could not generate description"
@@ -259,243 +374,27 @@ def find_closest_path(query, embeddings_file="file_embeddings.csv"):
     model = SentenceTransformer('all-MiniLM-L6-v2')
     query_embedding = model.encode(query)
 
-    print("Finding closest extensions...")
-    closest_ext = find_closest_extensions(query, query_embedding)
-    
     print("Calculating similarities...")
     # Calculate similarities
     similarities = []
     for emb in embeddings:
         similarity = 1 - cosine(query_embedding, emb)
-        if is_file[embeddings.index(emb)]:
-            similarity = adjust_similarity_score(paths[embeddings.index(emb)], similarity, query, closest_ext)
         similarities.append(similarity)
     
     # Find best match
     best_idx = np.argmax(similarities)
     return paths[best_idx], descriptions[best_idx], similarities[best_idx]
 
-def get_file_extensions():
-    return {
-        # Documents and Text
-        '.txt': 'Plain text document',
-        '.doc': 'Microsoft Word document',
-        '.docx': 'Microsoft Word document (XML-based)',
-        '.pdf': 'Portable Document Format',
-        '.rtf': 'Rich Text Format',
-        '.odt': 'OpenDocument text document',
-        '.md': 'Markdown document',
-        '.tex': 'LaTeX document',
-        '.wpd': 'WordPerfect document',
-        '.pages': 'Apple Pages document',
-
-        # Spreadsheets and Data
-        '.xlsx': 'Microsoft Excel spreadsheet (XML-based)',
-        '.xls': 'Microsoft Excel spreadsheet',
-        '.csv': 'Comma-separated values',
-        '.ods': 'OpenDocument spreadsheet',
-        '.tsv': 'Tab-separated values',
-        '.numbers': 'Apple Numbers spreadsheet',
-
-        # Presentations
-        '.ppt': 'Microsoft PowerPoint presentation',
-        '.pptx': 'Microsoft PowerPoint presentation (XML-based)',
-        '.key': 'Apple Keynote presentation',
-        '.odp': 'OpenDocument presentation',
-
-        # Images
-        '.jpg': 'JPEG image',
-        '.jpeg': 'JPEG image',
-        '.png': 'Portable Network Graphics image',
-        '.gif': 'Graphics Interchange Format image',
-        '.bmp': 'Bitmap image',
-        '.tiff': 'Tagged Image File Format',
-        '.svg': 'Scalable Vector Graphics',
-        '.webp': 'WebP image',
-        '.raw': 'Raw image format',
-        '.psd': 'Adobe Photoshop document',
-        '.ai': 'Adobe Illustrator document',
-
-        # Audio
-        '.mp3': 'MPEG Layer 3 audio',
-        '.wav': 'Waveform audio',
-        '.ogg': 'Ogg Vorbis audio',
-        '.flac': 'Free Lossless Audio Codec',
-        '.m4a': 'MPEG-4 audio',
-        '.aac': 'Advanced Audio Coding',
-        '.wma': 'Windows Media Audio',
-        '.mid': 'MIDI audio',
-        '.aiff': 'Audio Interchange File Format',
-
-        # Video
-        '.mp4': 'MPEG-4 video',
-        '.avi': 'Audio Video Interleave',
-        '.mov': 'Apple QuickTime movie',
-        '.wmv': 'Windows Media Video',
-        '.flv': 'Flash Video',
-        '.mkv': 'Matroska Video',
-        '.webm': 'WebM video',
-        '.m4v': 'MPEG-4 video',
-        '.3gp': '3GPP multimedia container',
-
-        # Programming and Development
-        '.py': 'Python source code',
-        '.java': 'Java source code',
-        '.class': 'Java compiled class',
-        '.js': 'JavaScript source code',
-        '.jsx': 'JavaScript React',
-        '.ts': 'TypeScript source code',
-        '.tsx': 'TypeScript React',
-        '.html': 'HyperText Markup Language',
-        '.htm': 'HyperText Markup Language',
-        '.css': 'Cascading Style Sheets',
-        '.scss': 'Sass stylesheet',
-        '.less': 'Less stylesheet',
-        '.php': 'PHP source code',
-        '.c': 'C source code',
-        '.cpp': 'C++ source code',
-        '.h': 'C/C++ header file',
-        '.cs': 'C# source code',
-        '.rb': 'Ruby source code',
-        '.go': 'Go source code',
-        '.rs': 'Rust source code',
-        '.swift': 'Swift source code',
-        '.kt': 'Kotlin source code',
-        '.sql': 'SQL database file',
-
-        # Compressed and Archive
-        '.zip': 'ZIP archive',
-        '.rar': 'RAR archive',
-        '.7z': '7-Zip archive',
-        '.tar': 'Tape archive',
-        '.gz': 'Gzip compressed file',
-        '.bz2': 'Bzip2 compressed file',
-
-        # System and Configuration
-        '.exe': 'Windows executable',
-        '.dll': 'Dynamic Link Library',
-        '.sys': 'System file',
-        '.ini': 'Configuration file',
-        '.cfg': 'Configuration file',
-        '.xml': 'Extensible Markup Language',
-        '.json': 'JavaScript Object Notation',
-        '.yaml': 'YAML configuration file',
-        '.yml': 'YAML configuration file',
-        '.log': 'Log file',
-        '.bat': 'Windows batch file',
-        '.sh': 'Shell script',
-
-        # Database
-        '.db': 'Database file',
-        '.sqlite': 'SQLite database',
-        '.mdb': 'Microsoft Access database',
-        '.accdb': 'Microsoft Access database',
-        '.dbf': 'dBase database',
-
-        # Font
-        '.ttf': 'TrueType font',
-        '.otf': 'OpenType font',
-        '.woff': 'Web Open Font Format',
-        '.woff2': 'Web Open Font Format 2',
-        '.eot': 'Embedded OpenType font',
-
-        # Email and Calendar
-        '.eml': 'Email message',
-        '.msg': 'Outlook email message',
-        '.ics': 'iCalendar file',
-        '.vcf': 'vCard contact file',
-
-        # 3D and CAD
-        '.obj': '3D object file',
-        '.stl': 'Stereolithography file',
-        '.fbx': 'Filmbox 3D file',
-        '.blend': 'Blender 3D file',
-        '.dae': 'COLLADA 3D file',
-        '.dwg': 'AutoCAD drawing',
-        '.skp': 'SketchUp file',
-
-        # Game Development
-        '.unity': 'Unity scene file',
-        '.unitypackage': 'Unity asset package',
-        '.prefab': 'Unity prefab file',
-        '.uasset': 'Unreal Engine asset',
-        '.map': 'Game map file',
-        '.bsp': 'Binary Space Partition'
-    }
-
-def get_extension_similarity(query, query_emb, extension_desc, embeddings_cache="extension_embeddings.csv"):
-    """Calculate similarity between query and file extension description using cached embeddings"""
-    model = SentenceTransformer('all-MiniLM-L6-v2')
-    
-    # Load or create extension embeddings cache
-    if os.path.exists(embeddings_cache):
-        print("Loading extension embeddings cache...")
-        df = pd.read_csv(embeddings_cache)
-        ext_emb = np.array(eval(df[df['description'] == extension_desc]['embedding'].iloc[0]))
-    else:
-        # Generate embeddings for all extensions
-        extensions = get_file_extensions()
-        embeddings_data = []
-        
-        print("Generating extension embeddings cache...")
-        for ext, desc in extensions.items():
-            emb = model.encode(desc).tolist()
-            embeddings_data.append([ext, desc, emb])
-            
-        # Save embeddings cache
-        df = pd.DataFrame(embeddings_data, columns=['extension', 'description', 'embedding'])
-        df.to_csv(embeddings_cache, index=False)
-        ext_emb = model.encode(extension_desc)
-    
-    return 1 - cosine(query_emb, ext_emb)
-
-def find_closest_extensions(query, query_emb):
-    """Find top 5 extensions most relevant to the query using parallel processing"""
-    extensions = get_file_extensions()
-    
-    # Process extension similarities in parallel
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        future_to_ext = {
-            executor.submit(get_extension_similarity, query, query_emb, desc): ext 
-            for ext, desc in extensions.items()
-        }
-        
-        similarities = []
-        for future in concurrent.futures.as_completed(future_to_ext):
-            ext = future_to_ext[future]
-            try:
-                similarity = future.result()
-                similarities.append((ext, similarity))
-            except Exception as e:
-                print(f"Error processing {ext}: {e}")
-    
-    return sorted(similarities, key=lambda x: x[1], reverse=True)[:5]
-
-def adjust_similarity_score(path, score, query, top_extensions):
-    """Adjust similarity score based on file extension relevance"""
-    if '.' not in path or path == '.':
-        return score
-        
-    extension = '.' + path.split('.')[-1]
-    
-    # Give bonus if file extension is among top 5 relevant extensions
-    for i, (ext, ext_score) in enumerate(top_extensions):
-        if extension == ext:
-            # Bonus decreases with position in top 5
-            bonus = 0.1 * (5-i) / 5
-            return score + bonus
-            
-    return score
-
 # Example usage
 if __name__ == "__main__":
-    # First run to generate descriptions and embeddings
-    descriptions, embeddings = generate_file_descriptions(max_depth=3)
-    
-    # Then search
-    query = "the txt file where I stored the commands I got"
-    path, desc, score = find_closest_path(query)
-    print(f"Query: {query}")
-    print(f"Best match: {path}")
-    print(f"Description: {desc}")
-    print(f"Similarity score: {score:.3f}")
+    descriptions, embeddings = generate_file_descriptions()
+
+    # Then find nearest command
+    query = "I want to look at the contents of my main.py file"
+    result = find_nearest_command(query, descriptions, embeddings)
+
+    print(f"Command: {result['command']}")
+    print(f"Description: {result['description']}")
+    print(f"Arguments: {result['arguments']}")
+    print(f"Generated command: {result['generated_command']}")
+    print(f"Confidence: {result['confidence']:.3f}")
