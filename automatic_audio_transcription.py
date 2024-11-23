@@ -7,7 +7,7 @@ from transformers import pipeline
 asr_pipeline = pipeline(
     "automatic-speech-recognition",
     model="openai/whisper-small.en",  # Modèle exclusivement anglais
-    device="cuda" if torch.cuda.is_available() else "cpu"
+    # device="cuda" if torch.cuda.is_available() else "cpu"
 )
 
 # Paramètres audio
@@ -56,5 +56,5 @@ def audio_listening():
 
     return transcription
 
-t = audio_listening()
-print(f"You just said: {t}")
+# t = audio_listening()
+# print(f"You just said: {t}")

@@ -16,7 +16,8 @@ import time
 from tqdm import tqdm
 
 dotenv.load_dotenv()
-API_KEY = os.getenv("OPENAI_API_KEY")
+# API_KEY = os.getenv("OPENAI_API_KEY")
+from constants import API_KEY
 
 # Define command templates and their metadata
 WINDOWS_COMMANDS = {
@@ -303,6 +304,7 @@ def generate_file_descriptions(max_depth=3, cache_file="file_descriptions.csv", 
 
         # Process only new paths
         start_time = time.time()
+        print('Process new path...')
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
             futures = [executor.submit(get_description, i) for i, p in enumerate(paths) if p in paths_to_process]
             for future in tqdm(concurrent.futures.as_completed(futures), 
@@ -390,9 +392,11 @@ if __name__ == "__main__":
     descriptions, embeddings = generate_file_descriptions()
 
     # Then find nearest command
-    query = "I want to look at the contents of my main.py file"
+    # query = "I want to look at the contents of my inference.py file"
+    query = "I want to move my extraction file python file to the destination output folder"
     result = find_nearest_command(query, descriptions, embeddings)
 
+    print(f"Query: {query}")
     print(f"Command: {result['command']}")
     print(f"Description: {result['description']}")
     print(f"Arguments: {result['arguments']}")
